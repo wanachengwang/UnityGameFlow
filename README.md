@@ -39,7 +39,7 @@ A standard unity project directory structure.
 
 ## 3rd Frameworks/Packages
 * [Zenject](https://github.com/modesttree/Zenject)----------a IOC/DependencyInjection framework
-* [UniRx]()https://github.com/neuecc/UniRx------------Reactive Extention for Unity3d
+* [UniRx](https://github.com/neuecc/UniRx)------------Reactive Extention for Unity3d
 * [Entitas CSharp](https://github.com/sschmid/Entitas-CSharp) - entity component system framework, but I think it is a little overdesigned.
 * [Node Editor](https://github.com/Baste-RainGames/Node_Editor) - (calculation-)node editor
 * [Fungus](https://github.com/snozbot/fungus) - 2d interactive storytelling game framework
