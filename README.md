@@ -8,7 +8,7 @@ A standard unity project directory structure.
         - Music
         - Sfx
     + Effects-----Particle effects
-    + Gui
+    + Gui---------Sprite/Atlas
     + Models------All models/animations/textures here
 * GameModules-----Program code for game modules
 * Materials-------Common use(not artist-made) mat
