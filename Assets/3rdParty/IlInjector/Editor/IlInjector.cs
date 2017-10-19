@@ -8,8 +8,9 @@ using System.Linq;
 using UnityEngine;
 using UnityEditor;
 
-public class IlInjector {
-
+public class ILInjector {
+	static readonly string InjectedFlagNameSpace = "@ILInjector@";
+	static readonly string InjectedFlagTypeName = "Injected";
     static List<string> _methodNameFilter;
     static bool MethodFilter(MethodDefinition method) {
         if (_methodNameFilter == null || _methodNameFilter.Count == 0)
@@ -27,12 +28,11 @@ public class IlInjector {
         return true;
     }
 
-
-
-    static void Inject(string assemblyPath, List<string> methods) {
+	public static void Inject(string assemblyPath, List<string> methods, List<string> pathToResolve) {
         _methodNameFilter = methods;
-
-        var readerParameters = new ReaderParameters { ReadSymbols = true };
+		Debug.Log("Start to inject "+assemblyPath);
+		
+		var readerParameters = new ReaderParameters { ReadSymbols = true };
         AssemblyDefinition assembly = AssemblyDefinition.ReadAssembly(assemblyPath, readerParameters);
 
         var resolver = assembly.MainModule.AssemblyResolver as BaseAssemblyResolver;
@@ -42,12 +42,17 @@ public class IlInjector {
             try {
                 resolver.AddSearchDirectory(System.IO.Path.GetDirectoryName(path));
             } catch (Exception) {
-
+				// Do nothing
             }
         }
+		if (pathToResolve != null) {
+			foreach (var path in pathToResolve) {
+				resolver.AddSearchDirectory (path);
+			}
+		}
 
-        if (assembly.Modules.Any(module => module.Types.Any(x => x.Namespace == "__ILXTime" && x.Name == "INJECTED"))) {
-            Debug.LogError("This Assembly is already injected!");
+		if (assembly.Modules.Any(m => m.Types.Any(t => t.Namespace == InjectedFlagNameSpace && t.Name == InjectedFlagTypeName))) {
+			Debug.LogError("This assembly is already injected!");
             return;
         }
         foreach (var module in assembly.Modules) {
@@ -58,7 +63,7 @@ public class IlInjector {
             }
         }
         var objType = assembly.MainModule.ImportReference(typeof(object));
-        assembly.MainModule.Types.Add(new TypeDefinition("__IlInjector", "IlInjected", TypeAttributes.Class, objType));
+		assembly.MainModule.Types.Add(new TypeDefinition(InjectedFlagNameSpace, InjectedFlagTypeName, TypeAttributes.Class, objType));
 
         FileUtil.CopyFileOrDirectory(assemblyPath, assemblyPath + ".bak");
 
@@ -70,7 +75,6 @@ public class IlInjector {
         if (assembly.MainModule.SymbolReader != null) {
             assembly.MainModule.SymbolReader.Dispose();
         }
-        UnityEditorInternal.InternalEditorUtility.RequestScriptReload();
     }
 
     public static void InjectMethod(TypeDefinition type, MethodDefinition method) {
@@ -80,10 +84,10 @@ public class IlInjector {
             return;
         if (method.Parameters.Any(p => p.IsIn || p.IsOut || p.ParameterType.IsByReference))
             return;
-        TypeDefinition delegateTypeRef = type.Module.Types.Single(t => t.FullName == "HotFixBridge");
+        TypeDefinition delegateTypeRef = type.Module.Types.Single(t => t.FullName == "ILInvoker");
 
         if (delegateTypeRef != null) {
-            delegateTypeRef = type.Module.Types.Single(x => x.Name == "HotFixBridge");
+			delegateTypeRef = type.Module.Types.Single(x => x.Name == "ILInvoker");
             string delegateFieldName = GenerateMethodName(method);
             FieldDefinition item = new FieldDefinition(delegateFieldName, FieldAttributes.Static | FieldAttributes.Public, delegateTypeRef);
             FieldReference parameter = item.FieldType.Resolve().Fields.Single(field => field.Name == "Parameters");
