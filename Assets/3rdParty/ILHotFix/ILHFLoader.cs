@@ -8,14 +8,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// TODO : Version validate, Hotfix check and download and validate and apply
+// Version + HotFix
+// TODO: Version validate, HotFix check and download and validate and apply
+// step0: Start game
+// step1: Validate version, if fail(old version), download the latest version and restart
+// step2: Validate HotFix, if fail(old hotfix), download and load hotfix.
 
 public class ILHFLoader : MonoBehaviour {
 
     public static readonly string DelegatePrefix = "_@Delegate@_";
 
-    string _dllPath;
-    string _pdbPath;
+    string dllPath;
+    string pdbPath;
     //AppDomain是ILRuntime的入口，最好是在一个单例类中保存，整个游戏全局就一个，这里为了示例方便，每个例子里面都单独做了一个
     //大家在正式项目中请全局只创建一个AppDomain
     ILRuntime.Runtime.Enviorment.AppDomain appdomain;
