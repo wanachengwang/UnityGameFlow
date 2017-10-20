@@ -6,21 +6,18 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-public class ILInvoker {
+public class ILHFInvoker {
 	public static ILRuntime.Runtime.Enviorment.AppDomain ILRTDomain;
 
-	public ILInvoker(IMethod method)
-	{
+	public ILHFInvoker(IMethod method) {
 		_method = method;
 		Parameters = new object[method.Parameters.Count];
 	}
 
 	private IMethod _method;
 	public object[] Parameters;
-	public object Invoke()
-	{
-		if (ILRTDomain != null)
-		{
+	public object Invoke() {
+		if (ILRTDomain != null)	{
 			return ILRTDomain.Invoke(_method, null, Parameters);
 		}
 		return null;

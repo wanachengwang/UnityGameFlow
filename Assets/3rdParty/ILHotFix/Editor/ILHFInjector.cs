@@ -1,5 +1,4 @@
-﻿#if true    //UNITY_EDITOR
-using Mono.Cecil;
+﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System;
 using System.Collections;
@@ -8,8 +7,8 @@ using System.Linq;
 using UnityEngine;
 using UnityEditor;
 
-public class ILInjector {
-	static readonly string InjectedFlagNameSpace = "@ILInjector@";
+public class ILHFInjector {
+	static readonly string InjectedFlagNameSpace = "_@ILHFInjector@_";
 	static readonly string InjectedFlagTypeName = "Injected";
     static List<string> _methodNameFilter;
     static bool MethodFilter(MethodDefinition method) {
@@ -24,13 +23,20 @@ public class ILInjector {
             return false;
         if (type.FullName.StartsWith("<") && type.FullName.EndsWith(">"))
             return false;
-        Debug.Log(type.FullName);
         return true;
     }
+    static string GenerateMethodName(MethodDefinition method) {
+        string delegateFieldName = ILHFLoader.DelegatePrefix + method.Name;
+        for (int i = 0; i < method.Parameters.Count; i++) {
+            delegateFieldName += "_" + method.Parameters[i].ParameterType.Name;
+        }
+        delegateFieldName = delegateFieldName.Replace(".", "_").Replace("`", "_");
+        return delegateFieldName;
+    }
 
-	public static void Inject(string assemblyPath, List<string> methods, List<string> pathToResolve) {
+    public static void Inject(string assemblyPath, List<string> methods, List<string> pathToResolve) {
         _methodNameFilter = methods;
-		Debug.Log("Start to inject "+assemblyPath);
+		Debug.Log(InjectedFlagNameSpace + ": Start to inject " +assemblyPath);
 		
 		var readerParameters = new ReaderParameters { ReadSymbols = true };
         AssemblyDefinition assembly = AssemblyDefinition.ReadAssembly(assemblyPath, readerParameters);
@@ -52,7 +58,7 @@ public class ILInjector {
 		}
 
 		if (assembly.Modules.Any(m => m.Types.Any(t => t.Namespace == InjectedFlagNameSpace && t.Name == InjectedFlagTypeName))) {
-			Debug.LogError("This assembly is already injected!");
+			Debug.LogError(InjectedFlagNameSpace + ": This assembly is already injected!");
             return;
         }
         foreach (var module in assembly.Modules) {
@@ -70,7 +76,7 @@ public class ILInjector {
         var writerParameters = new WriterParameters { WriteSymbols = true };
         assembly.Write(assemblyPath, writerParameters);
 
-        Debug.Log("Inject Success!!!");
+        Debug.Log(InjectedFlagNameSpace + ": Inject Success!!!");
 
         if (assembly.MainModule.SymbolReader != null) {
             assembly.MainModule.SymbolReader.Dispose();
@@ -84,8 +90,8 @@ public class ILInjector {
             return;
         if (method.Parameters.Any(p => p.IsIn || p.IsOut || p.ParameterType.IsByReference))
             return;
-        TypeDefinition delegateTypeRef = type.Module.Types.Single(t => t.FullName == "ILInvoker");
 
+        TypeDefinition delegateTypeRef = type.Module.Types.Single(t => t.FullName == "ILInvoker");
         if (delegateTypeRef != null) {
 			delegateTypeRef = type.Module.Types.Single(x => x.Name == "ILInvoker");
             string delegateFieldName = GenerateMethodName(method);
@@ -138,6 +144,8 @@ public class ILInjector {
                 ilGenerator.InsertBefore(insertPoint, ilGenerator.Create(OpCodes.Unbox_Any, method.ReturnType));
             }
             ilGenerator.InsertBefore(insertPoint, ilGenerator.Create(OpCodes.Ret));
+
+            Debug.Log(InjectedFlagNameSpace +"."+ type.Name + "." + method.Name+" injected!");
         }
     }
 
@@ -194,16 +202,4 @@ public class ILInjector {
         return null;
         //return externalAssembly.GetType(fullName);
     }
-
-    public static string GenerateMethodName(MethodDefinition method) {
-        string delegateFieldName = "__" + method.Name;
-        for (int i = 0; i < method.Parameters.Count; i++) {
-            delegateFieldName += "_" + method.Parameters[i].ParameterType.Name;
-        }
-        delegateFieldName += "__Delegate";
-        delegateFieldName = delegateFieldName.Replace(".", "_").Replace("`", "_");
-
-        return delegateFieldName;
-    }
 }
-#endif
