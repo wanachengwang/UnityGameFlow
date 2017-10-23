@@ -1,25 +1,24 @@
 ﻿using ILRuntime.CLR.Method;
-using ILRuntime.CLR.TypeSystem;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
 
-public class ILHFInvoker {
-	public static ILRuntime.Runtime.Enviorment.AppDomain ILRTDomain;
+namespace ILHotFix {
+    public class ILHFInvoker {
+        public static string TypeFullName { get { return typeof(ILHFInvoker).FullName; } }
+        public static string TypeName { get { return typeof(ILHFInvoker).Name; } }
+        public static string ParamFieldName { get { return "Params"; } }
+        public static string InvokeFuncName { get { return "Invoke"; } }
+        public static ILRuntime.Runtime.Enviorment.AppDomain ILRTDomain;
+        public object[] Params;
+        private IMethod _method;
 
-	public ILHFInvoker(IMethod method) {
-		_method = method;
-		Parameters = new object[method.Parameters.Count];
-	}
-
-	private IMethod _method;
-	public object[] Parameters;
-	public object Invoke() {
-		if (ILRTDomain != null)	{
-			return ILRTDomain.Invoke(_method, null, Parameters);
-		}
-		return null;
-	}
+        public ILHFInvoker(IMethod method) {
+            _method = method;
+            Params = new object[method.Parameters.Count];
+        }
+        public object Invoke() {
+            if (ILRTDomain != null) {
+                return ILRTDomain.Invoke(_method, null, Params);
+            }
+            return null;
+        }
+    }
 }
