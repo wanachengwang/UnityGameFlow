@@ -84,7 +84,7 @@ namespace ILHotFix {
             ILHFInvoker.ILRTDomain = appdomain;
             //Debug.Log(appdomain.LoadedTypes.Count);
             foreach (var type in appdomain.LoadedTypes.ToArray()) {
-                Type origionalType = Type.GetType(type.Value.Name);
+                Type origionalType = Type.GetType(type.Value.FullName);
                 if (origionalType != null) {
                     foreach (var method in type.Value.GetMethods()) {
                         string delegateName = GenerateMethodName(method);
