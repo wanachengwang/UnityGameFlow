@@ -2,7 +2,7 @@
 using UnityEngine;
 
 // Patch the same fullname(namespace&classname)
-namespace ILHotFix {
+namespace ILHotFixTst {
     public class ILHFHelloWorld {
         public static void Start(ILHFHelloWorld self) {
             Debug.Log("HotFix:ILHFHelloWorld.Start.");

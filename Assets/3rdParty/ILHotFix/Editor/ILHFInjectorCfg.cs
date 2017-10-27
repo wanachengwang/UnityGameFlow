@@ -7,17 +7,32 @@ using UnityEngine;
 namespace ILHotFix {
     public class ILHFInjectorCfg : EditorWindow {
 
-        static readonly string[] DefAssembliesPathToInject = new string[]{
+        static readonly List<string> DefAssembliesPathToInject = new List<string>{
             @"Library\ScriptAssemblies\Assembly-CSharp.dll",
         };
-        static readonly string[] DefMethodsToInject = new string[]{
+        static readonly List<string> DefNameSpacesToInject = new List<string>();    // Default only global namespace will be injected.
+        static readonly List<string> DefMethodsToInject = new List<string>{
             "Awake","Start","Update","LateUpdate","OnEnable","OnDisable","OnDestroy",
             "OnTriggerEnter","OnTriggerStay","OnTriggerExit",
             "OnCollisionEnter","OnCollisionStay","OnCollisionExit",
         };
+        static readonly List<string> DefAsmResolvePath = new List<string>();
+        static readonly List<string>[] DefStringArrayToStore = new List<string>[] {
+                        DefAssembliesPathToInject,
+                        DefNameSpacesToInject,
+                        DefMethodsToInject,
+                        DefAsmResolvePath,
+                    };
         static List<string> _assembliesPathToInject = new List<string>();
+        static List<string> _namespacesToInject = new List<string>();
         static List<string> _methodsToInject = new List<string>();
         static List<string> _asmResolvePath = new List<string>();
+        static List<string>[] _stringArrayToStore = new List<string>[] {
+                        _assembliesPathToInject,
+                        _namespacesToInject,
+                        _methodsToInject,
+                        _asmResolvePath,
+                    };
         static ILHFInjectorCfg _cfgWindow;
         static string _configFilePathName = null;
         static string ConfigFilePathName {
@@ -38,22 +53,19 @@ namespace ILHotFix {
             }
         }
         public static List<string> AssembliesPathToInject { get { return _assembliesPathToInject; } }
+        public static List<string> NameSpacesToInject { get { return _namespacesToInject;  } }
         public static List<string> MethodsToInject { get { return _methodsToInject; } }
         public static List<string> AsmResolvePath { get { return _asmResolvePath; } }
 
         static void ResetDefConfig() {
-            _assembliesPathToInject = new List<string>(DefAssembliesPathToInject);
-            _methodsToInject = new List<string>(DefMethodsToInject);
-            _asmResolvePath.Clear();
+            for(int i = 0; i < _stringArrayToStore.Length; i++) {
+                _stringArrayToStore[i].Clear();
+                _stringArrayToStore[i].AddRange(DefStringArrayToStore[i]);
+            }
         }
         public static void ReadConfig() {
             if (File.Exists(ConfigFilePathName)) {
                 using (StreamReader ss = new StreamReader(ConfigFilePathName)) {
-                    List<string>[] _stringArrayToStore = new List<string>[] {
-                        _assembliesPathToInject,
-                        _methodsToInject,
-                        _asmResolvePath,
-                    };
                     int idx = 0;
                     LitJson.JsonReader reader = new JsonReader(ss);
                     while (reader.Read()) {
@@ -77,11 +89,6 @@ namespace ILHotFix {
         }
         public static void WriteConfig() {
             using (StreamWriter sw = new StreamWriter(ConfigFilePathName)) {
-                List<string>[] _stringArrayToStore = new List<string>[] {
-                    _assembliesPathToInject,
-                    _methodsToInject,
-                    _asmResolvePath,
-                };
                 LitJson.JsonWriter writer = new JsonWriter(sw);
                 writer.WriteArrayStart();
                 foreach (List<string> strArray in _stringArrayToStore) {
@@ -135,6 +142,20 @@ namespace ILHotFix {
                 _assembliesPathToInject.Add(string.Empty);
             }
 
+            EditorGUILayout.LabelField("Additional Namespace to inject:");
+            for (int i = 0; i < _namespacesToInject.Count; i++) {
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button("-", GUILayout.Width(20))) {
+                    _namespacesToInject.RemoveAt(i);
+                } else {
+                    _namespacesToInject[i] = EditorGUILayout.TextField("NameSpace No." + i, _namespacesToInject[i]);
+                }
+                GUILayout.EndHorizontal();
+            }
+            if (GUILayout.Button("+", GUILayout.Width(20))) {
+                _namespacesToInject.Add(string.Empty);
+            }
+
             EditorGUILayout.LabelField("Methods to inject:");
             for (int i = 0; i < _methodsToInject.Count; i++) {
                 GUILayout.BeginHorizontal();
@@ -171,7 +192,7 @@ namespace ILHotFix {
             if (EditorGUI.EndChangeCheck()) {
                 Debug.Log("GUI Changed.");
             }
-            _cfgWindow.position = new Rect(_cfgWindow.position.position, new Vector2(400, (_assembliesPathToInject.Count + 2 + _methodsToInject.Count + 2 + _asmResolvePath.Count + 2 + 1) * 20));
+            _cfgWindow.position = new Rect(_cfgWindow.position.position, new Vector2(400, (_assembliesPathToInject.Count + 2 + _namespacesToInject.Count + 2 + _methodsToInject.Count + 2 + _asmResolvePath.Count + 2 + 1) * 20));
         }
     }
 }

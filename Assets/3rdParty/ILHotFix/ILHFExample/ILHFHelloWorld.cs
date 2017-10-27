@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ILHotFix {
+namespace ILHotFixTst {
     public class ILHFHelloWorld : MonoBehaviour {
 
         // Use this for initialization

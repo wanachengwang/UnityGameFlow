@@ -10,20 +10,18 @@ namespace ILHotFix {
     public class ILHFInjector {
         static readonly string InjectedFlagNameSpace = "_@ILHFInjector@_";
         static readonly string InjectedFlagTypeName = "Injected";
-        static List<string> _methodNameFilter;
-        static bool MethodFilter(MethodDefinition method) {
-            if (_methodNameFilter == null || _methodNameFilter.Count == 0)
-                return false;
-            return _methodNameFilter.Contains(method.Name);
+        static bool MethodFilter(MethodDefinition method, List<string> filterMethods) {
+            return filterMethods.Contains(method.Name);
         }
-        static bool TypeFilter(TypeDefinition type) {
-            if (type.Namespace.Contains("ILRuntime"))
-                return false;
-            if (type.FullName.Contains("LitJson"))
-                return false;
-            if (type.FullName.StartsWith("<") && type.FullName.EndsWith(">"))
-                return false;
-            return true;
+        static bool TypeFilter(TypeDefinition type, List<string> filterNamespaces) {
+            //if (type.Namespace.Contains("ILRuntime"))
+            //if (type.FullName.Contains("LitJson"))
+            if (string.IsNullOrEmpty(type.Namespace) || filterNamespaces.Contains(type.Namespace)) {
+                if (type.FullName.StartsWith("<") && type.FullName.EndsWith(">"))
+                    return false;
+                return true;
+            }
+            return false;
         }
         static string GenerateMethodName(MethodDefinition method) {
             string delegateFieldName = ILHFLoader.DelegatePrefix + method.Name;
@@ -34,8 +32,7 @@ namespace ILHotFix {
             return delegateFieldName;
         }
 
-        public static void Inject(string assemblyPath, List<string> methods, List<string> additionalAsmResolverPath) {
-            _methodNameFilter = methods;
+        public static void Inject(string assemblyPath, List<string> namespaces, List<string> methods, List<string> additionalAsmResolverPath) {
             Debug.Log(InjectedFlagNameSpace + ": Start to inject " + assemblyPath);
 
             var readerParameters = new ReaderParameters { ReadSymbols = true };
@@ -62,8 +59,8 @@ namespace ILHotFix {
                 return;
             }
             foreach (var module in assembly.Modules) {
-                foreach (var typ in module.Types.Where(TypeFilter)) {
-                    foreach (var method in typ.Methods.Where(MethodFilter)) {
+                foreach (var typ in module.Types.Where(t=>TypeFilter(t, namespaces))) {
+                    foreach (var method in typ.Methods.Where(m=>MethodFilter(m, methods))) {
                         InjectMethod(typ, method);
                     }
                 }

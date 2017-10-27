@@ -15,7 +15,7 @@ namespace ILHotFix {
 
             ILHFInjectorCfg.ReadConfig();
             for (int i = 0; i < ILHFInjectorCfg.AssembliesPathToInject.Count; i++) {
-                ILHFInjector.Inject(ILHFInjectorCfg.AssembliesPathToInject[i], ILHFInjectorCfg.MethodsToInject, ILHFInjectorCfg.AsmResolvePath);
+                ILHFInjector.Inject(ILHFInjectorCfg.AssembliesPathToInject[i], ILHFInjectorCfg.NameSpacesToInject, ILHFInjectorCfg.MethodsToInject, ILHFInjectorCfg.AsmResolvePath);
             }
             UnityEditorInternal.InternalEditorUtility.RequestScriptReload();
         }
