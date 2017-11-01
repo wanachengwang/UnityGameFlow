@@ -12,6 +12,8 @@ namespace ZenjectTst {
         [Inject]
         ZTstEnemy.Factory _ztEnemyFactory;
 
+        readonly Settings _settings;
+
         [Inject]
         float _fField;
         //[Inject]
@@ -23,10 +25,11 @@ namespace ZenjectTst {
         void Init() {
             _fField = 4.4f;
         }
-        public ZenjectTstGameMgr(float fVal) {
+        public ZenjectTstGameMgr(float fVal, Settings settings) {
             _n++;
             _fField = 2 * fVal;
-            Debug.Log("ZenjectTstGameMgr:"+_n+","+ _fField);
+            _settings = settings;
+            Debug.Log("ZenjectTstGameMgr:"+_n+","+ _fField+","+_settings.Speed);
         }
 
         List<ZTstEnemy> _ztEnemyLst = new List<ZTstEnemy>();
@@ -41,6 +44,11 @@ namespace ZenjectTst {
                 _ztEnemyLst.Add(e1);
                 Debug.Log("A Pressed!!!!!!");
             }
+        }
+
+        [Serializable]
+        public class Settings {
+            public float Speed;
         }
     }
 
@@ -57,7 +65,7 @@ namespace ZenjectTst {
             public Factory(DiContainer container) {
                 _container = container;
             }
-            public Enemy Create(int lv) {
+            public new Enemy Create(int lv) {
                 Debug.Log("Create an enemy:"+lv);
                 return _container.Instantiate<Enemy>();
             }

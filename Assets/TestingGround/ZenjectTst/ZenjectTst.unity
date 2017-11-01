@@ -239,7 +239,8 @@ MonoBehaviour:
   _installers:
   - {fileID: 692776576}
   _installerPrefabs: []
-  _scriptableObjectInstallers: []
+  _scriptableObjectInstallers:
+  - {fileID: 11400000, guid: bc9e9d715d25aaa428eb482cc4ab144a, type: 2}
   _parentNewObjectsUnderRoot: 0
   _contractNames: []
   _parentContractName: 
