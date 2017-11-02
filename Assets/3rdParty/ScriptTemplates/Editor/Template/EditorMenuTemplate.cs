@@ -73,7 +73,7 @@ namespace ScriptTemplates {
 
 			// Automatically initialize on load?
 			if (OutputInitializeOnLoad || OutputStaticConstructor)
-				sb.AppendLine("static " + scriptName + "()" + OpeningBraceInsertion + "\n}\n");
+				sb.AppendLine("static " + scriptName + "()" + MethodBody);
 
 			if (!string.IsNullOrEmpty(_menuItem)) {
 				string menuName = _menuItem;

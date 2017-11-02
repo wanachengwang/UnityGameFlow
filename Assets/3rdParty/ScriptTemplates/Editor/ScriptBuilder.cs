@@ -15,17 +15,23 @@ namespace ScriptTemplates {
 		private StringBuilder _sb = new StringBuilder();
 
 		private int _indentLevel = 0;
+        private string _newln;
 		private string _indent = "";
 		private string _indentChars = "\t";
 		private string _indentCharsNewLine = "\n";
 
-		/// <summary>
-		/// Gets or sets sequence of characters to use when indenting text.
-		/// </summary>
-		/// <remarks>
-		/// <para>Changing this value will not affect text which has already been appended.</para>
-		/// </remarks>
-		public string IndentChars {
+        public ScriptBuilder(bool unixStyleNewLine) {
+            _newln = unixStyleNewLine ? "\n" : "\r\n"; ;
+            _indentCharsNewLine = _newln;
+        }
+
+        /// <summary>
+        /// Gets or sets sequence of characters to use when indenting text.
+        /// </summary>
+        /// <remarks>
+        /// <para>Changing this value will not affect text which has already been appended.</para>
+        /// </remarks>
+        public string IndentChars {
 			get { return _indentChars; }
 			set {
 				int restoreIndent = _indentLevel;
@@ -51,7 +57,7 @@ namespace ScriptTemplates {
 					for (int i = 0; i < value; ++i)
 						_indent += _indentChars;
 
-					_indentCharsNewLine = "\n" + _indent;
+					_indentCharsNewLine = _newln + _indent;
 				}
 			}
 		}
@@ -121,7 +127,7 @@ namespace ScriptTemplates {
 		/// The string.
 		/// </returns>
 		public override string ToString() {
-			return _sb.ToString().Trim() + "\n";
+            return _sb.ToString().Trim() + _newln;
 		}
 
 	}

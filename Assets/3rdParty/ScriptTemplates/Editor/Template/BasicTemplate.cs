@@ -95,7 +95,7 @@ namespace ScriptTemplates {
 
 			// Automatically initialize on load?
 			if (_typeKeyword == "class" && (IsEditorScript && OutputInitializeOnLoad || OutputStaticConstructor))
-				sb.AppendLine("static " + scriptName + "()" + OpeningBraceInsertion + "\n}\n");
+				sb.AppendLine("static " + scriptName + "()" + MethodBody);
 
 			sb.EndNamespace("}");
 

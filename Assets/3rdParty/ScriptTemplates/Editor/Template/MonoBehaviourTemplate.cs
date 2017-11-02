@@ -75,16 +75,16 @@ namespace ScriptTemplates {
 
 			// Automatically initialize on load?
 			if (OutputStaticConstructor)
-				sb.AppendLine("static " + scriptName + "()" + OpeningBraceInsertion + "\n}\n");
+				sb.AppendLine("static " + scriptName + "()" + MethodBody);
 
 			if (_outputAwakeMethod)
-				sb.AppendLine("private void Awake()" + OpeningBraceInsertion + "\n}\n");
+				sb.AppendLine("private void Awake()" + MethodBody);
 			if (_outputStartMethod)
-				sb.AppendLine("private void Start()" + OpeningBraceInsertion + "\n}\n");
+				sb.AppendLine("private void Start()" + MethodBody);
 			if (_outputUpdateMethod)
-				sb.AppendLine("private void Update()" + OpeningBraceInsertion + "\n}\n");
+				sb.AppendLine("private void Update()" + MethodBody);
 			if (_outputOnDestroyMethod)
-				sb.AppendLine("private void OnDestroy()" + OpeningBraceInsertion + "\n}\n");
+				sb.AppendLine("private void OnDestroy()" + MethodBody);
 			
 			sb.EndNamespace("}");
 

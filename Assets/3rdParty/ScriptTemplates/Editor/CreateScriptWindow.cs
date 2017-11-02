@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEditor;
@@ -15,15 +16,13 @@ namespace ScriptTemplates {
 
 		[MenuItem("Assets/Create Script from Template", false, 11)]
 		private static void ShowWindow() {
-            CreateScriptWindow w =GetWindow<CreateScriptWindow>("Create Script");            
+            GetWindow<CreateScriptWindow>("Create Script");            
         }
 
 		[SerializeField]
 		private string _scriptName = "";
 		[SerializeField]
 		private string _ns = "";
-		[SerializeField]
-		private bool _nsForSubFolders;
 
 		[NonSerialized]
 		private string[] _templateDescriptions;
@@ -34,24 +33,48 @@ namespace ScriptTemplates {
 		private ScriptTemplateGenerator _activeGenerator;
 
 		private void OnEnable() {
-			minSize = new Vector2(230, 100);
-
-			_nsForSubFolders = EditorPrefs.GetBool("ScriptTemplates.NamespaceToDirectory", true);
-
+			minSize = new Vector2(230, 240);
 			AutoFixActiveGenerator();
-		}
+        }
 
 		private Vector2 _scrollPosition;
 
-        CreateScriptWindow _w = null;
-        private void OnGUI() {
-            if(_w == null) {
-                _w = this;
-                Vector2 pos = GUIUtility.GUIToScreenPoint(Event.current.mousePosition);                
-                _w.position = new Rect(pos, _w.position.size);
+        private bool _bInitPos = true;
+        private void CheckSetInitPos() {
+            if (_bInitPos) {
+                _bInitPos = false;
+                Vector2 pos = GUIUtility.GUIToScreenPoint(Event.current.mousePosition);
+                position = new Rect(pos, position.size);
             }
+        }
 
-			EditorGUILayout.Space();
+        EditorWindow _projectWindow = null;
+        string _saveFolder;
+        private static EditorWindow GetWindowByName(string pName) {
+            UnityEngine.Object[] objectList = Resources.FindObjectsOfTypeAll(typeof(EditorWindow));
+            foreach (UnityEngine.Object obj in objectList) {
+                if (obj.GetType().ToString() == pName)
+                    return ((EditorWindow)obj);
+            }
+            return (null);
+        }
+        private void UpdateSaveFolder() {
+            _projectWindow = _projectWindow ?? GetWindowByName("UnityEditor.ProjectBrowser");
+            if(_projectWindow != null) {
+                //Since this was an internal type of UnityEditor assembly, I needed to pass the class and the assembly that the class belongs to Type.GetType.
+                Type t = Type.GetType("UnityEditor.ProjectBrowser,UnityEditor");
+                _saveFolder = (t.GetField("m_LastFolders", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(_projectWindow) as string[])[0];
+                //_saveFolder = t.GetField("m_SelectedPath", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(_projectWindow) as string;
+                //_saveFolder = AssetDatabase.GetAssetPath(Selection.activeObject);
+            }
+            EditorGUILayout.LabelField("Path: " + _saveFolder);
+        }
+
+        private void OnGUI() {
+            CheckSetInitPos();
+            UpdateSaveFolder();
+
+            EditorGUILayout.Space();
 			DrawTemplateSelector();
 			EditorGUILayout.Space();
 
@@ -95,25 +118,13 @@ namespace ScriptTemplates {
 
 			EditorGUILayout.PrefixLabel("Namespace:");
 			_ns = EditorGUILayout.TextField(_ns);
-
-			EditorGUI.BeginChangeCheck();
-			_nsForSubFolders = EditorGUILayout.ToggleLeft("Use namespace for sub-folders", _nsForSubFolders);
-			if (EditorGUI.EndChangeCheck())
-				EditorPrefs.SetBool("ScriptTemplates.NamespaceToDirectory", _nsForSubFolders);
 		}
 
 		private void DrawButtonStrip() {
 			GUILayout.Box(GUIContent.none, GUILayout.Height(2), GUILayout.ExpandWidth(true));
 
-			if (GUILayout.Button("Save at Default Path"))
-				DoSaveAtDefaultPath();
-			if (GUILayout.Button("Save As"))
-				DoSaveAs();
-
-			EditorGUILayout.Space();
-
-			if (GUILayout.Button("Copy to Clipboard"))
-				DoCopyToClipboard();
+			if (GUILayout.Button("Save"))
+                DoSaveAtSelectedFolder();
 		}
 
 		private void AutoFixActiveGenerator() {
@@ -133,10 +144,6 @@ namespace ScriptTemplates {
 		private string GetDefaultOutputPath() {
 			string assetFolder = Path.Combine("Assets", _activeGenerator.WillGenerateEditorScript ? "Editor/Scripts" : "Scripts");
 
-			// Use namespace for sub-folders?
-			if (_nsForSubFolders && !string.IsNullOrEmpty(_ns))
-				assetFolder = Path.Combine(assetFolder, _ns.Replace("_", "/"));
-
 			string outputPath = Path.Combine(Directory.GetCurrentDirectory(), assetFolder);
 
 			// Ensure that this path actually exists.
@@ -146,8 +153,8 @@ namespace ScriptTemplates {
 			return outputPath;
 		}
 
-		private void DoSaveAtDefaultPath() {
-			GenerateScriptFromTemplate(Path.Combine(GetDefaultOutputPath(), _scriptName + ".cs"));
+		private void DoSaveAtSelectedFolder() {
+            GenerateScriptFromTemplate(Path.Combine(_saveFolder, _scriptName + ".cs"));
 		}
 
 		private void DoSaveAs() {

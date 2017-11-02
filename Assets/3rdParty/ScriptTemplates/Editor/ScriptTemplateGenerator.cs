@@ -31,6 +31,7 @@ namespace ScriptTemplates {
 		#region Shared Preferences
 
 		private static bool s_BracesOnNewLine;
+        private static bool s_UnixStyleNewLine;
 
 		private static bool s_EditorScript;
 		private static bool s_InitializeOnLoad;
@@ -41,9 +42,10 @@ namespace ScriptTemplates {
 		private static bool s_PartialClass;
 
 		private static void LoadSharedPreferences() {
-			s_BracesOnNewLine = EditorPrefs.GetBool("ScriptTemplates.Shared.BracesOnNewLine", false);
+            s_BracesOnNewLine = EditorPrefs.GetBool("ScriptTemplates.Shared.BracesOnNewLine", false);
+            s_UnixStyleNewLine = EditorPrefs.GetBool("ScriptTemplates.Shared.UnixStyleNewLine", false);
 
-			s_EditorScript = EditorPrefs.GetBool("ScriptTemplates.Shared.EditorScript", false);
+            s_EditorScript = EditorPrefs.GetBool("ScriptTemplates.Shared.EditorScript", false);
 			s_InitializeOnLoad = EditorPrefs.GetBool("ScriptTemplates.Shared.InitializeOnLoad", false);
 			s_StaticConstructor = EditorPrefs.GetBool("ScriptTemplates.Shared.StaticConstructor", false);
 
@@ -62,6 +64,17 @@ namespace ScriptTemplates {
 					EditorPrefs.SetBool("ScriptTemplates.Shared.BracesOnNewLine", s_BracesOnNewLine = value);
 			}
 		}
+
+        /// <summary>
+        /// Gets or sets whether newline uses "\n"(unix) or "\r\n"(windows).
+        /// </summary>
+        protected static bool UnixStyleNewLine {
+            get { return s_UnixStyleNewLine;  }
+            set {
+                if (value != s_UnixStyleNewLine)
+                    EditorPrefs.SetBool("ScriptTemplates.Shared.UnixStyleNewLine", s_UnixStyleNewLine = value);
+            }
+        }
 
 		/// <summary>
 		/// When applicable indicates whether script should be for editor usage.
@@ -144,6 +157,10 @@ namespace ScriptTemplates {
 			get { return BracesOnNewLine ? "\n{" : " {"; }
 		}
 
+        protected static string MethodBody {
+            get { return BracesOnNewLine ? "\n{\n}\n" : "{\n}\n"; }
+        }
+
 		#endregion
 
 		/// <summary>
@@ -160,8 +177,9 @@ namespace ScriptTemplates {
 		/// Draws interface and handles GUI events for standard option inputs.
 		/// </summary>
 		public void OnStandardGUI() {
-			BracesOnNewLine = EditorGUILayout.ToggleLeft("Places braces on new lines", BracesOnNewLine);
-		}
+			BracesOnNewLine = EditorGUILayout.ToggleLeft("NewLine for openning brace", BracesOnNewLine);
+            UnixStyleNewLine = EditorGUILayout.ToggleLeft("Unix style NewLine(\\n)", UnixStyleNewLine);
+        }
 
 		/// <summary>
 		/// Create new <see cref="ScriptBuilder"/> instance to build script.
@@ -170,7 +188,7 @@ namespace ScriptTemplates {
 		/// The <see cref="ScriptBuilder"/> instance.
 		/// </returns>
 		public ScriptBuilder CreateScriptBuilder() {
-			return new ScriptBuilder();
+			return new ScriptBuilder(UnixStyleNewLine);
 		}
 
 		/// <summary>

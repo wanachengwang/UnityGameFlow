@@ -83,14 +83,14 @@ namespace ScriptTemplates {
 
 			// Automatically initialize on load?
 			if (IsEditorScript && OutputInitializeOnLoad || OutputStaticConstructor)
-				sb.AppendLine("static " + scriptName + "()" + OpeningBraceInsertion + "\n}\n");
+				sb.AppendLine("static " + scriptName + "()" + MethodBody);
 
 			if (_outputOnEnableMethod)
-				sb.AppendLine("private void OnEnable()" + OpeningBraceInsertion + "\n}\n");
+				sb.AppendLine("private void OnEnable()" + MethodBody);
 			if (_outputOnDisableMethod)
-				sb.AppendLine("private void OnDisable()" + OpeningBraceInsertion + "\n}\n");
+				sb.AppendLine("private void OnDisable()" + MethodBody);
 			if (_outputOnDestroyMethod)
-				sb.AppendLine("private void OnDestroy()" + OpeningBraceInsertion + "\n}\n");
+				sb.AppendLine("private void OnDestroy()" + MethodBody);
 			
 			sb.EndNamespace("}");
 

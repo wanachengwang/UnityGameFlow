@@ -106,7 +106,7 @@ namespace ScriptTemplates {
 
 			// Automatically initialize on load?
 			if (OutputInitializeOnLoad || OutputStaticConstructor)
-				sb.AppendLine("static " + scriptName + "()" + OpeningBraceInsertion + "\n}\n");
+				sb.AppendLine("static " + scriptName + "()" + MethodBody);
 
 			if (!string.IsNullOrEmpty(_menuItem)) {
 				string menuName = _menuItem;
@@ -122,15 +122,15 @@ namespace ScriptTemplates {
 			}
 
 			if (_outputOnEnableMethod)
-				sb.AppendLine("private void OnEnable()" + OpeningBraceInsertion + "\n}\n");
+				sb.AppendLine("private void OnEnable()" + MethodBody);
 			if (_outputOnDisableMethod)
-				sb.AppendLine("private void OnDisable()" + OpeningBraceInsertion + "\n}\n");
+				sb.AppendLine("private void OnDisable()" + MethodBody);
 			if (_outputOnGUIMethod)
-				sb.AppendLine("private void OnGUI()" + OpeningBraceInsertion + "\n}\n");
+				sb.AppendLine("private void OnGUI()" + MethodBody);
 			if (_outputUpdateMethod)
-				sb.AppendLine("private void Update()" + OpeningBraceInsertion + "\n}\n");
+				sb.AppendLine("private void Update()" + MethodBody);
 			if (_outputOnDestroyMethod)
-				sb.AppendLine("private void OnDestroy()" + OpeningBraceInsertion + "\n}\n");
+				sb.AppendLine("private void OnDestroy()" + MethodBody);
 			
 			sb.EndNamespace("}");
 
