@@ -8,7 +8,7 @@ A standard unity project directory structure.
         - Music
         - Sfx
     + Effects-----Particle effects
-    + Gui---------Sprite/Atlas
+    + Gui---------Ui sprites/ Atlas /Font
     + Models------All models/animations/textures here
 * GameModules-----Program code for game modules
 * Materials-------Common use(not artist-made) mat
@@ -20,6 +20,18 @@ A standard unity project directory structure.
 * StreamingAssets
 * TestingGround---Put all your test assets(code/scene/other) here
     + Editor
+
+## Game Modules
+* Singleton Mgr(Mgr of all mgrs, using Zenject)
+    + Persistent Mgr(SaveLoad) 
+    + Input Mgr
+    + Version/Hotfix Mgr
+    + Res Mgr(load/cache assets)
+    + Scene Flow Mgr
+* Utils
+    + Bug reporter
+    + game debugger
+    + ...
 
 ## Coding Convention
 | IDENTIFIER | CASE | EXAMPLE 
@@ -36,6 +48,35 @@ A standard unity project directory structure.
 | Private (static) field | Camel with prefix _ | _myVal
 | Public (static) field/Property | Pascal | BackColor
 | Parameter/Local variables | Camel | localVar
+
+## Class file layout
+* [StyleCop in stackoverflow](https://stackoverflow.com/questions/150479/order-of-items-in-classes-fields-properties-constructors-methods)
+    + Within a class, struct or interface: (SA1201 and SA1203)
+        - Constant Fields
+        - Fields
+        - Constructors
+        - Finalizers (Destructors)
+        - Delegates
+        - Events
+        - Enums
+        - Interfaces
+        - Properties
+        - Indexers
+        - Methods
+        - Structs
+        - Classes
+    + Within each of these groups order by access: (SA1202)
+        - public
+        - internal
+        - protected internal
+        - protected
+        - private
+    + Within each of the access groups: (SA1204)
+        - static
+        - non-static
+    + Within each of the static/non-static groups of fields: (SA1214 and SA1215)
+        - readonly
+        - non-readonly
 
 ## 3rd Frameworks/Packages
 * [Zenject](https://github.com/modesttree/Zenject)----------a IOC/DependencyInjection framework
